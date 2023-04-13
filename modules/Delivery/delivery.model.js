@@ -15,6 +15,10 @@ let deliverySchema = mongoose.Schema({
     rate: { type: Number, min: 1, max: 5, default: 2.5 }
 
 })
+deliverySchema.pre("save", async function (next) {
+    if (this.password) this.password = await bcrypt.hash(this.password, saltrouds);
+    next();
+})
 
 
 let deliveryModel = mongoose.model("deliverys", deliverySchema)
