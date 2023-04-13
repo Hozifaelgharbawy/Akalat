@@ -51,8 +51,7 @@ exports.list = async (filter) => {
 
 exports.create = async (form) => {
   try {
-    let user = {};
-    user = await this.isExist({ email: form.email });
+    let user = await this.isExist({ email: form.email });
     if (!user.success) {
       const newUser = new User(form);
       await newUser.save();

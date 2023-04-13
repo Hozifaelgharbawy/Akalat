@@ -24,6 +24,7 @@ let orderSchema = mongoose.Schema({
         }
     ],
     total: { type: Number, required: true },
+    originalTotal: { type: Number, required: true }
 })
 
 
