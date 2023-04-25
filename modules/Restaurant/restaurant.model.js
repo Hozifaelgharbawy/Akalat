@@ -8,7 +8,8 @@ let restaurantSchema = mongoose.Schema({
     phone: { type: String, default: null, required: true },
     image: { type: Object, default: null },
     rate: { type: Number, min: 1, max: 5, default: 2.5 },
-    url:{ type: String }
+    url:{ type: String },
+    role: { type: String, default: "restaurant" }
 })
 restaurantSchema.pre("save", async function (next) {
     if (this.password) this.password = await bcrypt.hash(this.password, saltrouds);

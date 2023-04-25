@@ -1,5 +1,6 @@
 let User = require("./user.model")
 let bcrypt = require("bcrypt");
+let fs = require("fs")
 
 
 exports.isExist = async (filter) => {
@@ -30,6 +31,33 @@ exports.isExist = async (filter) => {
 }
 
 
+exports.get = async (filter) => {
+  try {
+    if (filter) {
+      let record = await User.findOne(filter).select("-password");
+      return {
+        success: true,
+        record: record,
+        code: 200
+      };
+    }
+    else {
+      return {
+        success: false,
+        code: 404,
+        error: "User ID is required!"
+      }
+    }
+  } catch (err) {
+    return {
+      success: false,
+      code: 500,
+      error: "Unexpected Error!"
+    };
+  }
+
+}
+
 exports.list = async (filter) => {
   try {
     let users = await User.find(filter).select("-password");
@@ -51,6 +79,7 @@ exports.list = async (filter) => {
 
 exports.create = async (form) => {
   try {
+    if (form.email) form.email = form.email.toLowerCase()
     let user = await this.isExist({ email: form.email });
     if (!user.success) {
       const newUser = new User(form);
@@ -85,8 +114,9 @@ exports.update = async (_id, form) => {
     const user = await this.isExist({ _id });
     if (user.success) {
       if (form.email) {
+        form.email = form.email.toLowerCase()
         const duplicate = await this.isExist({ email: form.email });
-        if (duplicate.success && duplicate.record._id != client.record._id)
+        if (duplicate.success && duplicate.record._id != user.record._id)
           return {
             success: false,
             error: "This Email is taken by another user",
@@ -119,10 +149,19 @@ exports.update = async (_id, form) => {
 }
 
 
-exports.remove = async (_id) => {
+exports.remove = async (_id, role) => {
   try {
-    const user = await this.isExist({ _id });
+    const user = await this.isExist({ _id, role: role });
     if (user.success) {
+      let oldImage = (user.success && user.record.image) ? (user.record.image) : false
+      if (oldImage) {
+        try {
+          await fs.unlinkSync(oldImage.path);
+        }
+        catch (err) {
+          console.log(`err`, err.errno);
+        }
+      }
       await User.findByIdAndDelete({ _id })
       return {
         success: true,
@@ -150,6 +189,7 @@ exports.remove = async (_id) => {
 
 exports.comparePassword = async (email, password) => {
   try {
+    email = email.toLowerCase()
     let user = await this.isExist({ email })
     if (user.success) {
       let match = await bcrypt.compare(password, user.record.password)
@@ -187,6 +227,7 @@ exports.comparePassword = async (email, password) => {
 
 exports.resetPassword = async (email, newPassword) => {
   try {
+    email = email.toLowerCase()
     let user = await this.isExist({ email })
     let saltrouds = 5;
     if (user.success) {
