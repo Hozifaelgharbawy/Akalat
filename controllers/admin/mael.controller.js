@@ -1,18 +1,11 @@
-const user = require("../../modules/User/user.repo");
+const mael = require("../../modules/Meal/mael.repo");
 let fs = require("fs")
 
 
-exports.createUser = async (req, res) => {
+exports.createMael = async (req, res) => {
   try {
-    let form
-    if (req.body.role != "user") {
-      form = {
-        role: "user",
-        ...req.body
-      }
-    }
-    form = req.body
-    let result = await user.create(form)
+    let form = req.body
+    let result = await mael.create(form)
     return res.status(result.code).json(result)
   } catch (err) {
     console.log(`err.message`, err.message);
@@ -22,31 +15,12 @@ exports.createUser = async (req, res) => {
       error: "Unexpected Error!"
     });
   }
-
-}
-
-exports.resetPassword = async (req, res) => {
-  try {
-    const result = await user.resetPassword(req.body.email, req.body.newPassword);
-    res.status(result.code).json(result);
-  } catch (err) {
-    console.log(`err.message`, err.message);
-    res.status(500).json({
-      success: false,
-      code: 500,
-      error: "Unexpected Error!"
-    });
-  }
-
 }
 
 exports.listUsers = async (req, res) => {
   try {
-    const filter = {
-      role: "user",
-      ...req.query
-    };
-    const result = await user.list(filter);
+    const filter = req.query
+    const result = await mael.list(filter);
     res.status(result.code).json(result);
   } catch (err) {
     console.log(`err.message`, err.message);
@@ -60,14 +34,8 @@ exports.listUsers = async (req, res) => {
 
 exports.getUser = async (req, res) => {
   try {
-    let filter
-    if (Object.keys(req.query).length != 0) {
-      filter = {
-        role: "user",
-        ...req.query
-      };
-    }
-    const result = await user.get(filter);
+    let filter = req.query
+    const result = await mael.get(filter);
     res.status(result.code).json(result);
   } catch (err) {
     console.log(`err.message`, err.message);
@@ -81,9 +49,8 @@ exports.getUser = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
   try {
-    const result = await user.update(req.query._id, req.body);
+    const result = await mael.update(req.query._id, req.body);
     res.status(result.code).json(result);
-
   } catch (err) {
     console.log(`err.message`, err.message);
     res.status(500).json({
@@ -96,7 +63,7 @@ exports.updateUser = async (req, res) => {
 
 exports.removeUser = async (req, res) => {
   try {
-    const result = await user.remove(req.query._id, "user");
+    const result = await mael.remove(req.query._id);
     res.status(result.code).json(result);
   } catch (err) {
     console.log(`err.message`, err.message);
@@ -108,21 +75,23 @@ exports.removeUser = async (req, res) => {
   }
 }
 
-exports.uploadImage = async (req, res) => {
+exports.uploadImages = async (req, res) => {
   try {
     let image = req.files;
-    const result = await user.isExist({ _id: req.query._id, role: "user" })
+    const result = await mael.isExist({ _id: req.query._id })
     if (result.success) {
       let oldImage = (result.success && result.record.image) ? (result.record.image) : false
       if (oldImage) {
         try {
-          await fs.unlinkSync(oldImage.path);
+          await oldImage.map((image) => {
+            fs.unlinkSync(image.path);
+          })
         }
         catch (err) {
           console.log(`err`, err.errno);
         }
       }
-      const update = await user.update(req.query._id, { image: image[0] });
+      const update = await mael.update(req.query._id, { image: image });
       if (update.success) {
         res.status(update.code).json({ success: update.success, record: update.record.image, code: update.code });
       }
@@ -143,26 +112,92 @@ exports.uploadImage = async (req, res) => {
   }
 }
 
+exports.addToImagesArray = async (req, res) => {
+  try {
+    const result = await mael.isExist({ _id: req.query._id })
+    if (result.success) {
+      let oldImage = (result.success && result.record.image) ? (result.record.image) : false
+      let count = oldImage.length + req.files.length
+      let image = req.files
+      if (count <= 8) {
+        await image.map((image) => {
+          oldImage.push(image)
+        });
+      }
+      else {
+        res.status(400).json({
+          success: false,
+          code: 400,
+          error: "The number of mael images must be a maximum of 8 images"
+        });
+      }
+      const update = await mael.update(req.query._id, { image: oldImage });
+      if (update.success) {
+        res.status(update.code).json({ success: update.success, record: update.record.image, code: update.code });
+      }
+      else {
+        res.status(update.code).json({ success: update.success, error: update.error, code: update.code });
+      }
+    }
+    else {
+      res.status(result.code).json({ success: result.success, error: result.error, code: result.code });
+    }
+
+  } catch (err) {
+    console.log(`err.message`, err.message);
+    res.status(500).json({
+      success: false,
+      code: 500,
+      error: "Unexpected Error!"
+    });
+  }
+}
+
 exports.deleteImage = async (req, res) => {
   try {
-    const result = await user.isExist({ _id: req.query._id, role: "user" })
+    const result = await mael.isExist({ _id: req.query._id })
     if (result.success) {
       let oldImage = (result.success && result.record.image) ? (result.record.image) : false
       if (oldImage) {
         try {
-          await fs.unlinkSync(oldImage.path);
+          await oldImage.map((image) => {
+            fs.unlinkSync(image.path);
+          })
         }
         catch (err) {
           console.log(`err`, err.errno);
         }
       }
-      const update = await user.update(req.query._id, { $unset: { image: 1 } });
+      const update = await mael.update(req.query._id, { image: [] });
       if (update.success) {
         res.status(update.code).json({ success: update.success, code: update.code });
       }
       else {
         res.status(update.code).json({ success: update.success, error: update.error, code: update.code });
       }
+    }
+    else {
+      res.status(result.code).json({ success: result.success, error: result.error, code: result.code });
+    }
+  } catch (err) {
+    console.log(`err.message`, err.message);
+    res.status(500).json({
+      success: false,
+      code: 500,
+      error: "Unexpected Error!"
+    });
+  }
+}
+
+
+exports.removeFromImagesArray = async (req, res) => {
+  try {
+    const result = await mael.isExist({ _id: req.query._id });
+    if (result.success) {
+      await req.body.paths.map((path) => {
+        mael.update(req.query._id, { $pull: { image: { path: path } } });
+      });
+      res.status(200).json({ success: true, code: 200 });
     }
     else {
       res.status(result.code).json({ success: result.success, error: result.error, code: result.code });

@@ -1,14 +1,13 @@
-let Meal = require("./delivery.model")
-let fs = require("fs")
+let Review = require("./review.model")
 
 
 exports.isExist = async (filter) => {
   try {
-    const meal = await Meal.findOne(filter);
-    if (meal) {
+    const review = await Review.findOne(filter).lean();
+    if (review) {
       return {
         success: true,
-        record: meal,
+        record: review,
         code: 200
       };
     }
@@ -16,47 +15,11 @@ exports.isExist = async (filter) => {
       return {
         success: false,
         code: 404,
-        error: "meal is not found!"
+        error: "Review is not found!"
       };
     }
   } catch (err) {
     console.log(`err.message`, err.message);
-    return {
-      success: false,
-      code: 500,
-      error: "Unexpected Error!"
-    };
-  }
-}
-
-
-exports.get = async (filter) => {
-  try {
-    if (filter) {
-      let record = await Meal.findOne(filter);
-      if (record) {
-        return {
-          success: true,
-          record: record,
-          code: 200
-        };
-      }
-      else {
-        return {
-          success: false,
-          code: 404,
-          error: "Meal is not found!"
-        };
-      }
-    }
-    else {
-      return {
-        success: false,
-        code: 404,
-        error: "Meal ID is required!"
-      }
-    }
-  } catch (err) {
     return {
       success: false,
       code: 500,
@@ -68,10 +31,10 @@ exports.get = async (filter) => {
 
 exports.list = async (filter) => {
   try {
-    let meal = await Meal.find(filter);
+    let records = await Review.find(filter)
     return {
       success: true,
-      record: meal,
+      records,
       code: 200
     };
   } catch (err) {
@@ -82,18 +45,35 @@ exports.list = async (filter) => {
       error: "Unexpected Error!"
     };
   }
+
 }
 
-
-exports.create = async (form) => {
+exports.get = async (filter) => {
   try {
-    const newMeal = new Meal(form);
-    await newMeal.save();
-    return {
-      success: true,
-      record: newMeal,
-      code: 201
-    };
+    if (filter) {
+      let record = await Review.findOne(filter)
+      if (record) {
+        return {
+          success: true,
+          record,
+          code: 200
+        };
+      }
+      else {
+        return {
+          success: false,
+          code: 404,
+          error: "Review is not found!"
+        }
+      }
+    }
+    else {
+      return {
+        success: false,
+        code: 404,
+        error: "Review ID is required!"
+      }
+    }
   } catch (err) {
     console.log(`err.message`, err.message);
     return {
@@ -102,26 +82,63 @@ exports.create = async (form) => {
       error: "Unexpected Error!"
     };
   }
+
 }
 
+exports.create = async (form) => {
+  try {
+    let review;
+    if (form.type == "mael") {
+      review = await this.isExist({ user: form.user, restaurant: form.restaurant, mael: form.mael, type: form.type });
+    }
+    else if (form.type == "restaurant") {
+      review = await this.isExist({ user: form.user, restaurant: form.restaurant, type: form.type })
+    }
+    if (!review.success) {
+      const newReview = new Review(form);
+      await newReview.save();
+      return {
+        success: true,
+        record: newReview,
+        code: 201
+      };
+    }
+    else {
+      return {
+        success: true,
+        error: "Review already exists",
+        code: 404
+      };
+    }
 
+  } catch (err) {
+    console.log(`err.message`, err.message);
+    return {
+      success: false,
+      code: 500,
+      error: "Unexpected Error!"
+    };
+  }
+
+
+}
 
 exports.update = async (_id, form) => {
   try {
-    const meal = await this.isExist({ _id });
-    if (meal.success) {
-      await Meal.findByIdAndUpdate({ _id }, form)
-      let mealUpdate = await this.isExist({ _id });
+    const review = await this.isExist({ _id });
+    if (review.success) {
+      await Review.findByIdAndUpdate({ _id }, form)
+      let reviewUpdate = await this.isExist({ _id });
       return {
         success: true,
-        record: mealUpdate.record,
+        record: reviewUpdate.record,
         code: 201
       };
     }
     else {
       return {
         success: false,
-        error: meal.error,
+        error: review.error,
         code: 404
       };
     }
@@ -135,23 +152,11 @@ exports.update = async (_id, form) => {
   }
 }
 
-
 exports.remove = async (_id) => {
   try {
-    const meal = await this.isExist({ _id });
-    if (meal.success) {
-      let oldImages = (meal.success && meal.record.image) ? (meal.record.image) : false
-      if (oldImages) {
-        try {
-          await oldImages.map((image) => {
-            fs.unlinkSync(image.path);
-          })
-        }
-        catch (err) {
-          console.log(`err`, err.errno);
-        }
-      }
-      await Delivery.findByIdAndDelete({ _id })
+    const review = await this.isExist({ _id });
+    if (review.success) {
+      await Review.findByIdAndDelete({ _id })
       return {
         success: true,
         code: 200
@@ -160,16 +165,16 @@ exports.remove = async (_id) => {
     else {
       return {
         success: false,
-        error: delivery.error,
+        error: review.error,
         code: 404
       };
     }
   } catch (err) {
-    console.log(`err.message`, err.message);
     return {
       success: false,
       code: 500,
       error: "Unexpected Error!"
     };
   }
+
 }

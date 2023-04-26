@@ -1,18 +1,11 @@
-const user = require("../../modules/User/user.repo");
+const delivery = require("../../modules/Delivery/delivery.repo");
 let fs = require("fs")
 
 
-exports.createUser = async (req, res) => {
+exports.createDelivery = async (req, res) => {
   try {
-    let form
-    if (req.body.role != "user") {
-      form = {
-        role: "user",
-        ...req.body
-      }
-    }
-    form = req.body
-    let result = await user.create(form)
+    let form = req.body
+    let result = await delivery.create(form)
     return res.status(result.code).json(result)
   } catch (err) {
     console.log(`err.message`, err.message);
@@ -27,7 +20,7 @@ exports.createUser = async (req, res) => {
 
 exports.resetPassword = async (req, res) => {
   try {
-    const result = await user.resetPassword(req.body.email, req.body.newPassword);
+    const result = await delivery.resetPassword(req.body.email, req.body.newPassword);
     res.status(result.code).json(result);
   } catch (err) {
     console.log(`err.message`, err.message);
@@ -40,13 +33,10 @@ exports.resetPassword = async (req, res) => {
 
 }
 
-exports.listUsers = async (req, res) => {
+exports.listDelivery = async (req, res) => {
   try {
-    const filter = {
-      role: "user",
-      ...req.query
-    };
-    const result = await user.list(filter);
+    const filter = req.query
+    const result = await delivery.list(filter);
     res.status(result.code).json(result);
   } catch (err) {
     console.log(`err.message`, err.message);
@@ -58,16 +48,10 @@ exports.listUsers = async (req, res) => {
   }
 }
 
-exports.getUser = async (req, res) => {
+exports.getDelivery = async (req, res) => {
   try {
-    let filter
-    if (Object.keys(req.query).length != 0) {
-      filter = {
-        role: "user",
-        ...req.query
-      };
-    }
-    const result = await user.get(filter);
+    let filter = req.query
+    const result = await delivery.get(filter);
     res.status(result.code).json(result);
   } catch (err) {
     console.log(`err.message`, err.message);
@@ -79,11 +63,10 @@ exports.getUser = async (req, res) => {
   }
 }
 
-exports.updateUser = async (req, res) => {
+exports.updateDelivery = async (req, res) => {
   try {
-    const result = await user.update(req.query._id, req.body);
+    const result = await delivery.update(req.query._id, req.body);
     res.status(result.code).json(result);
-
   } catch (err) {
     console.log(`err.message`, err.message);
     res.status(500).json({
@@ -94,9 +77,9 @@ exports.updateUser = async (req, res) => {
   }
 }
 
-exports.removeUser = async (req, res) => {
+exports.removeDelivery = async (req, res) => {
   try {
-    const result = await user.remove(req.query._id, "user");
+    const result = await delivery.remove(req.query._id);
     res.status(result.code).json(result);
   } catch (err) {
     console.log(`err.message`, err.message);
@@ -111,7 +94,7 @@ exports.removeUser = async (req, res) => {
 exports.uploadImage = async (req, res) => {
   try {
     let image = req.files;
-    const result = await user.isExist({ _id: req.query._id, role: "user" })
+    const result = await restaurant.isExist({ _id: req.query._id })
     if (result.success) {
       let oldImage = (result.success && result.record.image) ? (result.record.image) : false
       if (oldImage) {
@@ -122,7 +105,7 @@ exports.uploadImage = async (req, res) => {
           console.log(`err`, err.errno);
         }
       }
-      const update = await user.update(req.query._id, { image: image[0] });
+      const update = await restaurant.update(req.query._id, { image: image[0] });
       if (update.success) {
         res.status(update.code).json({ success: update.success, record: update.record.image, code: update.code });
       }
@@ -145,7 +128,7 @@ exports.uploadImage = async (req, res) => {
 
 exports.deleteImage = async (req, res) => {
   try {
-    const result = await user.isExist({ _id: req.query._id, role: "user" })
+    const result = await restaurant.isExist({ _id: req.query._id })
     if (result.success) {
       let oldImage = (result.success && result.record.image) ? (result.record.image) : false
       if (oldImage) {
@@ -156,7 +139,7 @@ exports.deleteImage = async (req, res) => {
           console.log(`err`, err.errno);
         }
       }
-      const update = await user.update(req.query._id, { $unset: { image: 1 } });
+      const update = await restaurant.update(req.query._id, { $unset: { image: 1 } });
       if (update.success) {
         res.status(update.code).json({ success: update.success, code: update.code });
       }

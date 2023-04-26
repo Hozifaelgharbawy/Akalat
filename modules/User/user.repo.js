@@ -35,11 +35,20 @@ exports.get = async (filter) => {
   try {
     if (filter) {
       let record = await User.findOne(filter).select("-password");
-      return {
-        success: true,
-        record: record,
-        code: 200
-      };
+      if (record) {
+        return {
+          success: true,
+          record: record,
+          code: 200
+        };
+      }
+      else {
+        return {
+          success: false,
+          code: 404,
+          error: "Delivery is not found!"
+        };
+      }
     }
     else {
       return {

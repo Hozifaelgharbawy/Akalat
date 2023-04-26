@@ -16,7 +16,7 @@ exports.isExist = async (filter) => {
       return {
         success: false,
         code: 404,
-        error: "restaurant is not found!"
+        error: "Restaurant is not found!"
       };
     }
   } catch (err) {
@@ -29,13 +29,48 @@ exports.isExist = async (filter) => {
   }
 }
 
+exports.get = async (filter) => {
+  try {
+    if (filter) {
+      let record = await Restaurant.findOne(filter).select("-password");
+      if (record) {
+        return {
+          success: true,
+          record: record,
+          code: 200
+        };
+      }
+      else {
+        return {
+          success: false,
+          code: 404,
+          error: "Restaurant is not found!"
+        };
+      }
+    }
+    else {
+      return {
+        success: false,
+        code: 404,
+        error: "Restaurant ID is required!"
+      }
+    }
+  } catch (err) {
+    return {
+      success: false,
+      code: 500,
+      error: "Unexpected Error!"
+    };
+  }
+
+}
 
 exports.list = async (filter) => {
   try {
-    let restaurants = await Restaurant.find(filter).select("-password");
+    let restaurant = await Restaurant.find(filter).select("-password");
     return {
       success: true,
-      record: restaurants,
+      record: restaurant,
       code: 200
     };
   } catch (err) {
@@ -48,9 +83,9 @@ exports.list = async (filter) => {
   }
 }
 
-
 exports.create = async (form) => {
   try {
+    if (form.email) form.email = form.email.toLowerCase()
     let restaurant = await this.isExist({ email: form.email });
     if (!restaurant.success) {
       const newRestaurant = new Restaurant(form);
@@ -78,18 +113,17 @@ exports.create = async (form) => {
   }
 }
 
-
-
 exports.update = async (_id, form) => {
   try {
     const restaurant = await this.isExist({ _id });
     if (restaurant.success) {
       if (form.email) {
+        form.email = form.email.toLowerCase()
         const duplicate = await this.isExist({ email: form.email });
-        if (duplicate.success && duplicate.record._id != client.record._id)
+        if (duplicate.success && duplicate.record._id != restaurant.record._id)
           return {
             success: false,
-            error: "This Email is taken by another restaurant",
+            error: "This Email is taken by another Restaurant",
             code: 409
           };
       }
@@ -118,11 +152,19 @@ exports.update = async (_id, form) => {
   }
 }
 
-
 exports.remove = async (_id) => {
   try {
     const restaurant = await this.isExist({ _id });
     if (restaurant.success) {
+      let oldImage = (restaurant.success && restaurant.record.image) ? (restaurant.record.image) : false
+      if (oldImage) {
+        try {
+          await fs.unlinkSync(oldImage.path);
+        }
+        catch (err) {
+          console.log(`err`, err.errno);
+        }
+      }
       await Restaurant.findByIdAndDelete({ _id })
       return {
         success: true,
@@ -146,10 +188,9 @@ exports.remove = async (_id) => {
   }
 }
 
-
-
 exports.comparePassword = async (email, password) => {
   try {
+    email = email.toLowerCase()
     let restaurant = await this.isExist({ email })
     if (restaurant.success) {
       let match = await bcrypt.compare(password, restaurant.record.password)
@@ -183,10 +224,9 @@ exports.comparePassword = async (email, password) => {
   }
 }
 
-
-
 exports.resetPassword = async (email, newPassword) => {
   try {
+    email = email.toLowerCase()
     let restaurant = await this.isExist({ email })
     let saltrouds = 5;
     if (restaurant.success) {
