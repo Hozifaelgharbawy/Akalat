@@ -1,4 +1,4 @@
-let Meal = require("./delivery.model")
+let Meal = require("./mael.model")
 let fs = require("fs")
 
 
@@ -29,11 +29,11 @@ exports.isExist = async (filter) => {
   }
 }
 
-
 exports.get = async (filter) => {
   try {
     if (filter) {
-      let record = await Meal.findOne(filter);
+      let record = await Meal.findOne(filter)
+        .populate({ path: "restaurant", select: "name image" });
       if (record) {
         return {
           success: true,
@@ -68,7 +68,8 @@ exports.get = async (filter) => {
 
 exports.list = async (filter) => {
   try {
-    let meal = await Meal.find(filter);
+    let meal = await Meal.find(filter)
+      .populate({ path: "restaurant", select: "name image" });
     return {
       success: true,
       record: meal,
@@ -83,7 +84,6 @@ exports.list = async (filter) => {
     };
   }
 }
-
 
 exports.create = async (form) => {
   try {
@@ -103,8 +103,6 @@ exports.create = async (form) => {
     };
   }
 }
-
-
 
 exports.update = async (_id, form) => {
   try {
@@ -134,7 +132,6 @@ exports.update = async (_id, form) => {
     };
   }
 }
-
 
 exports.remove = async (_id) => {
   try {

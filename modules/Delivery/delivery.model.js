@@ -13,7 +13,8 @@ let deliverySchema = mongoose.Schema({
     image: {type: Object},
     gender: { type: String, enum: ["male", "female"], required: true },
     rate: { type: Number, min: 1, max: 5, default: 2.5 },
-    role: { type: String, default: "delivery" }
+    role: { type: String, default: "delivery" },
+    numOfReviews: { type: Number, default: 0 }
 })
 deliverySchema.pre("save", async function (next) {
     if (this.password) this.password = await bcrypt.hash(this.password, saltrouds);

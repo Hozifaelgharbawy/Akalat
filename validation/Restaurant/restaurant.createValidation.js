@@ -2,7 +2,7 @@ let joi = require("joi")
 
 
 module.exports = {
-  createDeliveryValidation: {
+  createRestaurantValidation: {
     body: joi.object().required().keys({
       name: joi.string().required().empty().messages({
         "string.base": "please enter a valid name",
@@ -24,7 +24,18 @@ module.exports = {
         "object.base": "please enter a valid image"
       }),
       role: joi.string().optional().messages({
-        "string.base": "please enter a valid role admin or user"
+        "string.base": "please enter a valid role restaurant"
+      }),
+      url: joi.string().optional().messages({
+        "string.base": "please enter a valid url"
+      }),
+      rate: joi.number().optional().min(1).max(5).messages({
+        "number.base": "please enter a valid rate",
+        "number.min": "rate must be between 1 and 5",
+        "number.max": "rate must be between 1 and 5"
+      }),
+      numOfReviews: joi.number().optional().messages({
+        "number.base": "please enter a valid numOfReviews",
       }),
       address: joi.string().required().empty().messages({
         "string.base": "please enter a valid address",
@@ -69,5 +80,5 @@ module.exports = {
         "string.pattern.base": "please enter a valid newPassword A-Z, a-z, 1-9, special character"
       })
     })
-},
+  },
 }

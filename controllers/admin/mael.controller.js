@@ -17,7 +17,7 @@ exports.createMael = async (req, res) => {
   }
 }
 
-exports.listUsers = async (req, res) => {
+exports.listMaels = async (req, res) => {
   try {
     const filter = req.query
     const result = await mael.list(filter);
@@ -32,7 +32,7 @@ exports.listUsers = async (req, res) => {
   }
 }
 
-exports.getUser = async (req, res) => {
+exports.getMael = async (req, res) => {
   try {
     let filter = req.query
     const result = await mael.get(filter);
@@ -47,7 +47,7 @@ exports.getUser = async (req, res) => {
   }
 }
 
-exports.updateUser = async (req, res) => {
+exports.updateMael = async (req, res) => {
   try {
     const result = await mael.update(req.query._id, req.body);
     res.status(result.code).json(result);
@@ -61,7 +61,7 @@ exports.updateUser = async (req, res) => {
   }
 }
 
-exports.removeUser = async (req, res) => {
+exports.removeMael = async (req, res) => {
   try {
     const result = await mael.remove(req.query._id);
     res.status(result.code).json(result);
@@ -75,7 +75,7 @@ exports.removeUser = async (req, res) => {
   }
 }
 
-exports.uploadImages = async (req, res) => {
+exports.uploadImage = async (req, res) => {
   try {
     let image = req.files;
     const result = await mael.isExist({ _id: req.query._id })
@@ -188,7 +188,6 @@ exports.deleteImage = async (req, res) => {
     });
   }
 }
-
 
 exports.removeFromImagesArray = async (req, res) => {
   try {

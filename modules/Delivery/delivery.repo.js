@@ -34,7 +34,8 @@ exports.isExist = async (filter) => {
 exports.get = async (filter) => {
   try {
     if (filter) {
-      let record = await Delivery.findOne(filter).select("-password");
+      let record = await Delivery.findOne(filter).select("-password")
+        .populate({ path: "restaurant", select: "name image" });
       if (record) {
         return {
           success: true,
@@ -69,7 +70,8 @@ exports.get = async (filter) => {
 
 exports.list = async (filter) => {
   try {
-    let delivery = await Delivery.find(filter).select("-password");
+    let delivery = await Delivery.find(filter).select("-password")
+    .populate({ path: "restaurant", select: "name image"});
     return {
       success: true,
       record: delivery,
@@ -84,7 +86,6 @@ exports.list = async (filter) => {
     };
   }
 }
-
 
 exports.create = async (form) => {
   try {
@@ -115,8 +116,6 @@ exports.create = async (form) => {
     };
   }
 }
-
-
 
 exports.update = async (_id, form) => {
   try {
@@ -157,7 +156,6 @@ exports.update = async (_id, form) => {
   }
 }
 
-
 exports.remove = async (_id) => {
   try {
     const delivery = await this.isExist({ _id });
@@ -194,8 +192,6 @@ exports.remove = async (_id) => {
   }
 }
 
-
-
 exports.comparePassword = async (email, password) => {
   try {
     email = email.toLowerCase()
@@ -231,8 +227,6 @@ exports.comparePassword = async (email, password) => {
     };
   }
 }
-
-
 
 exports.resetPassword = async (email, newPassword) => {
   try {

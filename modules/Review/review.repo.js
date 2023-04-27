@@ -32,6 +32,10 @@ exports.isExist = async (filter) => {
 exports.list = async (filter) => {
   try {
     let records = await Review.find(filter)
+      .populate({ path: "user", select: "name image" })
+      .populate({ path: "restaurant", select: "name image" })
+      .populate({ path: "delivery", select: "name image" })
+      .populate({ path: "mael", select: "name image" });
     return {
       success: true,
       records,
@@ -52,6 +56,10 @@ exports.get = async (filter) => {
   try {
     if (filter) {
       let record = await Review.findOne(filter)
+        .populate({ path: "user", select: "name image" })
+        .populate({ path: "restaurant", select: "name image" })
+        .populate({ path: "delivery", select: "name image" })
+        .populate({ path: "mael", select: "name image" });
       if (record) {
         return {
           success: true,
@@ -93,6 +101,9 @@ exports.create = async (form) => {
     }
     else if (form.type == "restaurant") {
       review = await this.isExist({ user: form.user, restaurant: form.restaurant, type: form.type })
+    }
+    else if (form.type == "delivery") {
+      review = await this.isExist({ user: form.user, delivery: form.delivery, type: form.type })
     }
     if (!review.success) {
       const newReview = new Review(form);

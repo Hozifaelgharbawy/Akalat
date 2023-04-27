@@ -10,7 +10,9 @@ let maelSchema = mongoose.Schema({
     image: [{ type: Object }],
     price: { type: Number, required: true },
     originalPrice: { type: Number, required: true },
-    rate: { type: Number, min: 1, max: 5, default: 2.5 }
+    rate: { type: Number, min: 1, max: 5, default: 2.5 },
+    numOfReviews: { type: Number, default: 0 },
+
 })
 
 

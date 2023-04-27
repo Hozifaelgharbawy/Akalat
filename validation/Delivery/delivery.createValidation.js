@@ -9,6 +9,11 @@ module.exports = {
         "any.required": "name must be entered",
         "string.empty": "name cannot be empty"
       }),
+      restaurant: joi.string().empty().required().messages({
+        "string.base": "please enter a valid restaurant Id",
+        "any.required": "restaurant Id must be entered",
+        "string.empty": "restaurant id cannot be empty"
+      }),
       email: joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com'] } }).empty().required().messages({
         "string.email": "please enter a valid email",
         "any.required": "email must be entered",
@@ -24,7 +29,19 @@ module.exports = {
         "object.base": "please enter a valid image"
       }),
       role: joi.string().optional().messages({
-        "string.base": "please enter a valid role admin or user"
+        "string.base": "please enter a valid role delivery"
+      }),
+      gender: joi.string().required().messages({
+        "string.base": "please enter a valid gender",
+        "any.required": "gender must be entered"
+      }),
+      rate: joi.number().optional().min(1).max(5).messages({
+        "number.base": "please enter a valid rate",
+        "number.min": "rate must be between 1 and 5",
+        "number.max": "rate must be between 1 and 5"
+      }),
+      numOfReviews: joi.number().optional().messages({
+        "number.base": "please enter a valid numOfReviews",
       }),
       address: joi.string().required().empty().messages({
         "string.base": "please enter a valid address",
@@ -69,5 +86,5 @@ module.exports = {
         "string.pattern.base": "please enter a valid newPassword A-Z, a-z, 1-9, special character"
       })
     })
-},
+  },
 }
