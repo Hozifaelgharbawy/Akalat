@@ -1,16 +1,13 @@
 const app = require("express").Router();
-const restaurantController = require("../../controllers/admin/restaurant.controller")
-const { createRestaurantValidation, resetPasswordValidation } = require("../../validation/Restaurant/restaurant.createValidation")
+const restaurantController = require("../../controllers/restaurant/restaurant.controller")
+const { resetPasswordValidation } = require("../../validation/Restaurant/restaurant.createValidation")
 const { updateRestaurantValidation } = require("../../validation/Restaurant/restaurant.updateValidation")
 const validator = require("../../helpers/validation.helper")
 const { uploadImage } = require("../../helpers/uploader.helper")
 const upload = uploadImage("restaurants")
 
 
-app.post("/create", validator(createRestaurantValidation), restaurantController.createRstaurant);
-
 app.get("/get", restaurantController.getRestaurant);
-app.get("/list", restaurantController.listRstaurants);
 
 app.put("/update", validator(updateRestaurantValidation), restaurantController.updateRestaurant);
 app.delete("/remove", restaurantController.removeRestaurant);

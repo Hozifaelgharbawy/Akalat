@@ -1,5 +1,5 @@
 const app = require("express").Router();
-const mealController = require("../../controllers/admin/meal.controller")
+const mealController = require("../../controllers/restaurant/meal.controller")
 const { uploadImage } = require("../../helpers/uploader.helper")
 const upload = uploadImage("meals")
 const { createMealVaidation } = require("../../validation/Meal/meal.createValidation")

@@ -1,6 +1,11 @@
 let User = require("./user.model")
 let bcrypt = require("bcrypt");
 let fs = require("fs")
+const Cart = require("../Cart/cart.model");
+const Review = require("../Review/review.repo");
+const Wishlist = require("../Wishlist/wishlist.model");
+const Order = require("../Order/order.model");
+
 
 
 exports.isExist = async (filter) => {
@@ -172,6 +177,13 @@ exports.remove = async (_id, role) => {
         }
       }
       await User.findByIdAndDelete({ _id })
+      await Cart.deleteMany({ "user": _id })
+      await Wishlist.deleteMany({ "user": _id })
+      let reviews = await Review.list({ "user": _id })
+      await reviews.records.map((review) => {
+        Review.remove( review._id )
+      })
+      await Order.deleteMany({ "user": _id })
       return {
         success: true,
         code: 200

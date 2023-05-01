@@ -15,3 +15,14 @@ exports.isValidUser = (req) => {
     }
     else return false;
 }
+
+exports.isValidOrder = (req) => {
+    if (req.tokenData.role == "user") {
+        let user = req.body.user ? req.body.user : req.query.user;
+        if (!user || user != req.tokenData._id) return false
+            
+        else return true;
+
+    }
+    else return false;
+}

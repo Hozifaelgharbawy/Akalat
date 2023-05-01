@@ -69,7 +69,7 @@ exports.addItem = async (clientId, itemId) => {
                     }
                 }
                 else {
-                    wishlist.record.items.push({ mael: Mael.record, restaurant: Mael.record.restaurant });
+                    wishlist.record.items.push({ mael: Mael.record, meal: Mael.record.restaurant });
                     await Wishlist.findByIdAndUpdate(
                         { _id: wishlist.record._id },
                         { items: wishlist.record.items }

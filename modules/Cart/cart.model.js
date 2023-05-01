@@ -15,6 +15,7 @@ let cartSchema = mongoose.Schema({
     },
     items: [
         {
+            _id: { type: mongoose.Types.ObjectId, ref: "meals" },
             meal: {
                 type: Object,
                 ref: "meals"

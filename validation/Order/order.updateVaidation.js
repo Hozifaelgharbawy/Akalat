@@ -71,6 +71,9 @@ module.exports = {
             originalTotal: joi.number().optional().messages({
                 "number.base": "please enter a valid total"
             }),
+            checkoutDate: joi.date().optional().messages({
+                "date.base": "please enter a valid checkout Date"
+            }),
 
         })
     }

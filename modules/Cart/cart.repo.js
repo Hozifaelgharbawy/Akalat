@@ -127,12 +127,12 @@ exports.calculateTotal = async (cart) => {
   }
 }
 
-exports.addItem = async (clientId, maelId, quantity) => {
+exports.addItem = async (userId, maelId, quantity) => {
   try {
     const item = await mael.isExist({ _id: maelId })
     if (item.success) {
       let price = parseFloat(item.record.price)
-      const cart = await this.isExist({ client: clientId })
+      const cart = await this.isExist({ user: userId })
       const itemExists = await this.isItemInCart(cart.record.items, maelId);
       if (itemExists.success) {
         let newQuantity = parseInt(itemExists.record.quantity) + parseInt(quantity)
@@ -174,9 +174,9 @@ exports.addItem = async (clientId, maelId, quantity) => {
   }
 }
 
-exports.removeItem = async (clientId, maelId, quantity) => {
+exports.removeItem = async (userId, maelId, quantity) => {
   try {
-    const cart = await this.isExist({ client: clientId })
+    const cart = await this.isExist({ user: userId })
     const itemExists = await this.isItemInCart(cart.record.items, maelId);
     if (itemExists.success) {
       let newQuantity = parseInt(itemExists.record.quantity) - parseInt(quantity)

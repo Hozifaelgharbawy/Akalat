@@ -1,6 +1,9 @@
 let Delivery = require("./delivery.model")
 let bcrypt = require("bcrypt");
 let fs = require("fs")
+const Cart = require("../Cart/cart.model");
+const Review = require("../Review/review.repo");
+const Order = require("../Order/order.model");
 
 
 exports.isExist = async (filter) => {
@@ -170,6 +173,12 @@ exports.remove = async (_id) => {
         }
       }
       await Delivery.findByIdAndDelete({ _id })
+      await Cart.deleteMany({ "delivery": _id })
+      let reviews = await Review.list({ "delivery": _id })
+      await reviews.records.map((review) => {
+        deliveryReview.remove( review._id )
+      })
+      await Order.deleteMany({ "delivery": _id })
       return {
         success: true,
         code: 200

@@ -1,5 +1,9 @@
 let Meal = require("./mael.model")
 let fs = require("fs")
+const Cart = require("../Cart/cart.model");
+const Review = require("../Review/review.repo");
+const Wishlist = require("../Wishlist/wishlist.model");
+const Order = require("../Order/order.model");
 
 
 exports.isExist = async (filter) => {
@@ -109,6 +113,8 @@ exports.update = async (_id, form) => {
     const meal = await this.isExist({ _id });
     if (meal.success) {
       await Meal.findByIdAndUpdate({ _id }, form)
+      await Cart.deleteMany({ "items._id": _id })
+      await Wishlist.deleteMany({ "items._id": _id })
       let mealUpdate = await this.isExist({ _id });
       return {
         success: true,
@@ -149,6 +155,13 @@ exports.remove = async (_id) => {
         }
       }
       await Delivery.findByIdAndDelete({ _id })
+      await Cart.deleteMany({ "items._id": _id })
+      await Wishlist.deleteMany({ "items._id": _id })
+      let reviews = await Review.list({ "meal": _id })
+      await reviews.records.map((review) => {
+        Review.remove( review._id )
+      })
+      await Order.deleteMany({ "items._id": _id })
       return {
         success: true,
         code: 200

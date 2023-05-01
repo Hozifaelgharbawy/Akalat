@@ -6,6 +6,8 @@ const validator = require("../../helpers/validation.helper")
 const { uploadImage } = require("../../helpers/uploader.helper")
 const upload = uploadImage("users")
 
+app.get("/get", userController.getUser);
+
 app.put("/update", validator(updateUserValidation), userController.updateUser);
 app.delete("/remove", userController.removeUser);
 app.put("/resetPassword", validator(resetPasswordValidation), userController.resetPassword);

@@ -15,6 +15,7 @@ let orderSchema = mongoose.Schema({
     },
     items: [
         {
+            _id: { type: mongoose.Types.ObjectId, ref: "meals" },
             meal: {
                 type: Object,
                 ref: "meals"
@@ -24,7 +25,8 @@ let orderSchema = mongoose.Schema({
         }
     ],
     total: { type: Number, required: true },
-    originalTotal: { type: Number, required: true }
+    originalTotal: { type: Number, required: true },
+    checkoutDate: { type: Date, default: Date.now() }
 })
 
 

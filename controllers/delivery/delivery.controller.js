@@ -1,20 +1,13 @@
-const user = require("../../modules/User/user.repo");
-const jwt = require("../../helpers/jwt.helper")
-const { isValidEmail, isValidUser } = require("../../helpers/user.helper")
+const delivery = require("../../modules/Delivery/delivery.repo");
+const { isValidDelivery, isValidEmail } = require("../../helpers/delivery.helper")
+
 let fs = require("fs")
 
 
 exports.register = async (req, res) => {
   try {
-    let form
-    if (req.body.role != "user") {
-      form = {
-        role: "user",
-        ...req.body
-      }
-    }
-    form = req.body
-    let result = await user.create(form)
+    let form = req.body
+    let result = await delivery.create(form)
     return res.status(result.code).json(result)
   } catch (err) {
     console.log(`err.message`, err.message);
@@ -24,13 +17,12 @@ exports.register = async (req, res) => {
       error: "Unexpected Error!"
     });
   }
-
 }
 
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const result = await user.comparePassword(email, password);
+    const result = await delivery.comparePassword(email, password);
     if (result.success) {
       payload = {
         _id: result.record._id, name: result.record.name, email: result.record.email,
@@ -52,51 +44,18 @@ exports.login = async (req, res) => {
   }
 }
 
-exports.getUser = async (req, res) => {
-  try {
-    const isValid = await isValidUser(req);
-    if (isValid) {
-      let filter
-      if (Object.keys(req.query).length != 0) {
-        filter = {
-          role: "user",
-          ...req.query
-        };
-      }
-      const result = await user.get(filter);
-      res.status(result.code).json(result);
-    }
-    else {
-      res.status(409).json({
-        success: false,
-        error: "You can only delete your account!",
-        code: 409
-      });
-    }
-  } catch (err) {
-    console.log(`err.message`, err.message);
-    res.status(500).json({
-      success: false,
-      code: 500,
-      error: "Unexpected Error!"
-    });
-  }
-}
-
 exports.resetPassword = async (req, res) => {
   try {
-    const isValid = await isValidEmail(req);
+    const isValid = isValidEmail(req);
     if (isValid) {
-      const result = await user.resetPassword(req.body.email, req.body.newPassword);
+      const result = await delivery.resetPassword(req.body.email, req.body.newPassword);
       res.status(result.code).json(result);
     }
-    else {
-      res.status(409).json({
-        success: false,
-        error: "You can only control your email!",
-        code: 409
-      });
-    }
+    else res.status(409).json({
+      success: false,
+      error: "You can only your account!",
+      code: 409
+    });
   } catch (err) {
     console.log(`err.message`, err.message);
     res.status(500).json({
@@ -108,20 +67,11 @@ exports.resetPassword = async (req, res) => {
 
 }
 
-exports.updateUser = async (req, res) => {
+exports.getDelivery = async (req, res) => {
   try {
-    const isValid = await isValidUser(req);
-    if (isValid) {
-      const result = await user.update(req.query._id, req.body);
-      res.status(result.code).json(result);
-    }
-    else {
-      res.status(409).json({
-        success: false,
-        error: "You can only update your data!",
-        code: 409
-      });
-    }
+    let filter = (req.query.delivery) != undefined ? req.query : { delivery: req.tokenData._id, ...req.query }
+    const result = await delivery.get(filter);
+    res.status(result.code).json(result);
   } catch (err) {
     console.log(`err.message`, err.message);
     res.status(500).json({
@@ -132,20 +82,40 @@ exports.updateUser = async (req, res) => {
   }
 }
 
-exports.removeUser = async (req, res) => {
+exports.updateDelivery = async (req, res) => {
   try {
-    const isValid = await isValidUser(req);
+    const isValid = isValidDelivery(req);
     if (isValid) {
-      const result = await user.remove(req.query._id, "user");
+      const result = await delivery.update(req.query._id, req.body);
       res.status(result.code).json(result);
     }
-    else {
-      res.status(409).json({
-        success: false,
-        error: "You can only delete your account!",
-        code: 409
-      });
+    else res.status(409).json({
+      success: false,
+      error: "You can only your account!",
+      code: 409
+    });
+  } catch (err) {
+    console.log(`err.message`, err.message);
+    res.status(500).json({
+      success: false,
+      code: 500,
+      error: "Unexpected Error!"
+    });
+  }
+}
+
+exports.removeDelivery = async (req, res) => {
+  try {
+    const isValid = isValidDelivery(req);
+    if (isValid) {
+      const result = await delivery.remove(req.query._id);
+      res.status(result.code).json(result);
     }
+    else res.status(409).json({
+      success: false,
+      error: "You can only your account!",
+      code: 409
+    });
   } catch (err) {
     console.log(`err.message`, err.message);
     res.status(500).json({
@@ -158,10 +128,10 @@ exports.removeUser = async (req, res) => {
 
 exports.uploadImage = async (req, res) => {
   try {
-    const isValid = await isValidUser(req);
+    const isValid = isValidDelivery(req);
     if (isValid) {
       let image = req.files;
-      const result = await user.isExist({ _id: req.query._id, role: "user" })
+      const result = await delivery.isExist({ _id: req.query._id })
       if (result.success) {
         let oldImage = (result.success && result.record.image) ? (result.record.image) : false
         if (oldImage) {
@@ -172,7 +142,7 @@ exports.uploadImage = async (req, res) => {
             console.log(`err`, err.errno);
           }
         }
-        const update = await user.update(req.query._id, { image: image[0] });
+        const update = await delivery.update(req.query._id, { image: image[0] });
         if (update.success) {
           res.status(update.code).json({ success: update.success, record: update.record.image, code: update.code });
         }
@@ -184,13 +154,11 @@ exports.uploadImage = async (req, res) => {
         res.status(result.code).json({ success: result.success, error: result.error, code: result.code });
       }
     }
-    else {
-      res.status(409).json({
-        success: false,
-        error: "You can only update your image!",
-        code: 409
-      });
-    }
+    else res.status(409).json({
+      success: false,
+      error: "You can only your account!",
+      code: 409
+    });
   } catch (err) {
     console.log(`err.message`, err.message);
     res.status(500).json({
@@ -203,9 +171,9 @@ exports.uploadImage = async (req, res) => {
 
 exports.deleteImage = async (req, res) => {
   try {
-    const isValid = await isValidUser(req);
+    const isValid = isValidDelivery(req);
     if (isValid) {
-      const result = await user.isExist({ _id: req.query._id, role: "user" })
+      const result = await delivery.isExist({ _id: req.query._id })
       if (result.success) {
         let oldImage = (result.success && result.record.image) ? (result.record.image) : false
         if (oldImage) {
@@ -216,7 +184,7 @@ exports.deleteImage = async (req, res) => {
             console.log(`err`, err.errno);
           }
         }
-        const update = await user.update(req.query._id, { $unset: { image: 1 } });
+        const update = await delivery.update(req.query._id, { $unset: { image: 1 } });
         if (update.success) {
           res.status(update.code).json({ success: update.success, code: update.code });
         }
@@ -228,13 +196,11 @@ exports.deleteImage = async (req, res) => {
         res.status(result.code).json({ success: result.success, error: result.error, code: result.code });
       }
     }
-    else {
-      res.status(409).json({
-        success: false,
-        error: "You can only update your image!",
-        code: 409
-      });
-    }
+    else res.status(409).json({
+      success: false,
+      error: "You can only your account!",
+      code: 409
+    });
   } catch (err) {
     console.log(`err.message`, err.message);
     res.status(500).json({

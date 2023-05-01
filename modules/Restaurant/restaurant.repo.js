@@ -1,5 +1,11 @@
 let Restaurant = require("./restaurant.model")
 let bcrypt = require("bcrypt");
+const Cart = require("../Cart/cart.model");
+const Review = require("../Review/review.repo");
+const Wishlist = require("../Wishlist/wishlist.model");
+const Order = require("../Order/order.model");
+const Delivery = require("../Delivery/delivery.model");
+
 
 
 exports.isExist = async (filter) => {
@@ -166,6 +172,14 @@ exports.remove = async (_id) => {
         }
       }
       await Restaurant.findByIdAndDelete({ _id })
+      await Cart.deleteMany({ "restaurant": _id })
+      await Wishlist.deleteMany({ "items.restaurant": _id })
+      let reviews = await Review.list({ "restaurant": _id })
+      await reviews.records.map((review) => {
+        Review.remove( review._id )
+      })
+      await Order.deleteMany({ "restaurant": _id })
+      await Delivery.deleteMany({ "restaurant": _id })
       return {
         success: true,
         code: 200

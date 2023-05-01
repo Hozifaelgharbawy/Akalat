@@ -33,7 +33,7 @@ exports.resetPassword = async (req, res) => {
 
 }
 
-exports.listrRstaurant = async (req, res) => {
+exports.listRstaurants = async (req, res) => {
   try {
     const filter = req.query
     const result = await delivery.list(filter);
