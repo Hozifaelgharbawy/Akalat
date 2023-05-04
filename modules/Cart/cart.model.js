@@ -9,16 +9,11 @@ let cartSchema = mongoose.Schema({
         type: mongoose.Types.ObjectId,
         ref: "restaurants"
     },
-    delivery: {
-        type: mongoose.Types.ObjectId,
-        ref: "deliverys"
-    },
     items: [
         {
             _id: { type: mongoose.Types.ObjectId, ref: "meals" },
             meal: {
-                type: Object,
-                ref: "meals"
+                type: Object
             },
             quantity: Number,
             total: Number

@@ -69,7 +69,7 @@ exports.getUser = async (req, res) => {
     else {
       res.status(409).json({
         success: false,
-        error: "You can only delete your account!",
+        error: "You can only control your account!",
         code: 409
       });
     }

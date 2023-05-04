@@ -35,8 +35,9 @@ module.exports = {
                 "array.base": "please enter a valid image"
             }),
 
-            description: joi.object().optional().messages({
-                "object.base": "please enter a valid description"
+            description: joi.string().empty().optional().messages({
+                "string.base": "please enter a valid description",
+                "string.empty": "restaurant id cannot be empty"
             }),
 
             rate: joi.number().optional().min(1).max(5).messages({

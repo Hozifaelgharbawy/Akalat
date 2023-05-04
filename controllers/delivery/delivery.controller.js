@@ -1,6 +1,6 @@
 const delivery = require("../../modules/Delivery/delivery.repo");
 const { isValidDelivery, isValidEmail } = require("../../helpers/delivery.helper")
-
+const jwt = require("../../helpers/jwt.helper")
 let fs = require("fs")
 
 
@@ -53,7 +53,7 @@ exports.resetPassword = async (req, res) => {
     }
     else res.status(409).json({
       success: false,
-      error: "You can only your account!",
+      error: "You can control only your account!",
       code: 409
     });
   } catch (err) {
@@ -69,7 +69,7 @@ exports.resetPassword = async (req, res) => {
 
 exports.getDelivery = async (req, res) => {
   try {
-    let filter = (req.query.delivery) != undefined ? req.query : { delivery: req.tokenData._id, ...req.query }
+    let filter = (req.query._id) != undefined ? req.query : { _id: req.tokenData._id, ...req.query }
     const result = await delivery.get(filter);
     res.status(result.code).json(result);
   } catch (err) {
@@ -91,7 +91,7 @@ exports.updateDelivery = async (req, res) => {
     }
     else res.status(409).json({
       success: false,
-      error: "You can only your account!",
+      error: "You can control only your account!",
       code: 409
     });
   } catch (err) {
@@ -113,7 +113,7 @@ exports.removeDelivery = async (req, res) => {
     }
     else res.status(409).json({
       success: false,
-      error: "You can only your account!",
+      error: "You can control only your account!",
       code: 409
     });
   } catch (err) {
@@ -156,7 +156,7 @@ exports.uploadImage = async (req, res) => {
     }
     else res.status(409).json({
       success: false,
-      error: "You can only your account!",
+      error: "You can control only your account!",
       code: 409
     });
   } catch (err) {
@@ -198,7 +198,7 @@ exports.deleteImage = async (req, res) => {
     }
     else res.status(409).json({
       success: false,
-      error: "You can only your account!",
+      error: "You can control only your account!",
       code: 409
     });
   } catch (err) {

@@ -1,28 +1,63 @@
 let Wishlist = require("./wishlist.model");
-const mael = require("../Meal/mael.repo")
+const meal = require("../Meal/meal.repo")
+
+exports.isExist = async (filter) => {
+    try {
+      const wishlist = await Wishlist.findOne(filter);
+      if (wishlist) {
+        return {
+          success: true,
+          record: wishlist,
+          code: 200
+        };
+      }
+      else {
+        return {
+          success: false,
+          code: 404,
+          error: "Wishlist is not found!"
+        };
+      }
+    } catch (err) {
+      console.log(`err.message`, err.message);
+      return {
+        success: false,
+        code: 500,
+        error: "Unexpected Error!"
+      };
+    }
+  }
 
 exports.get = async (filter) => {
     try {
-        const wishlist = await Wishlist.findOne(filter)
-            .populate({ path: "user", select: "name image" })
-            .populate({ path: "items.restaurant", select: "name image" });
-        if (wishlist) {
-            return {
-                success: true,
-                record: wishlist,
-                code: 200
-            };
-        }
-        else {
-            const wishlist = new Wishlist({ client: filter.client })
-            await wishlist.save();
-            wishlist = await Wishlist.findOne(filter)
+        if (filter.user) {
+            let wishlist = await Wishlist.findOne(filter)
                 .populate({ path: "user", select: "name image" })
                 .populate({ path: "items.restaurant", select: "name image" });
+            if (wishlist) {
+                return {
+                    success: true,
+                    record: wishlist,
+                    code: 200
+                };
+            }
+            else {
+                wishlist = new Wishlist({ user: filter.user })
+                await wishlist.save();
+                wishlist = await Wishlist.findOne(filter)
+                    .populate({ path: "user", select: "name image" })
+                    .populate({ path: "items.restaurant", select: "name image" });
+                return {
+                    success: true,
+                    record: wishlist,
+                    code: 201
+                };
+            }
+        } else {
             return {
-                success: true,
-                record: wishlist,
-                code: 201
+                success: false,
+                code: 404,
+                error: "User ID is required!"
             };
         }
     } catch (err) {
@@ -54,22 +89,22 @@ exports.list = async (filter) => {
     }
 }
 
-exports.addItem = async (clientId, itemId) => {
+exports.addItem = async (userId, itemId) => {
     try {
-        let Mael = await mael.isExist({ _id: itemId });
-        if (Mael.success) {
-            let wishlist = await this.get({ client: clientId });
+        let Meal = await meal.isExist({ _id: itemId });
+        if (Meal.success) {
+            let wishlist = await this.get({ user: userId });
             if (wishlist.success) {
                 let isExist = await this.isItemInWishlist(wishlist.record.items, itemId);
                 if (isExist.success) {
                     return {
                         success: false,
                         code: 400,
-                        error: "mael is already in the wishlist!"
+                        error: "meal is already in the wishlist!"
                     }
                 }
                 else {
-                    wishlist.record.items.push({ mael: Mael.record, meal: Mael.record.restaurant });
+                    wishlist.record.items.push({ _id: Meal.record._id, meal: Meal.record, restaurant: Meal.record.restaurant });
                     await Wishlist.findByIdAndUpdate(
                         { _id: wishlist.record._id },
                         { items: wishlist.record.items }
@@ -86,7 +121,7 @@ exports.addItem = async (clientId, itemId) => {
             return {
                 success: false,
                 code: 404,
-                error: "Mael is not found!"
+                error: "Meal is not found!"
 
             }
         }
@@ -103,7 +138,7 @@ exports.addItem = async (clientId, itemId) => {
 
 exports.removeItem = async (filter, item) => {
     try {
-        let wishlist = await this.get(filter);
+        let wishlist = await this.isExist(filter);
         if (wishlist.success) {
             let isExist = await this.isItemInWishlist(wishlist.record.items, item);
             if (isExist.success) {
@@ -141,7 +176,7 @@ exports.isItemInWishlist = async (arrayOfItems, itemId) => {
         let i = -1
         const result = await arrayOfItems.find(element => {
             i++;
-            if (element.mael._id == itemId) { return element }
+            if (element._id == itemId) { return element }
         });
         if (result) {
             return {

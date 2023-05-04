@@ -36,7 +36,7 @@ exports.resetPassword = async (req, res) => {
 exports.listRstaurants = async (req, res) => {
   try {
     const filter = req.query
-    const result = await delivery.list(filter);
+    const result = await restaurant.list(filter);
     res.status(result.code).json(result);
   } catch (err) {
     console.log(`err.message`, err.message);

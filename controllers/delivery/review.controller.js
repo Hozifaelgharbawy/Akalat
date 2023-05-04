@@ -1,21 +1,10 @@
 const review = require("../../modules/Review/review.repo")
-const { isValid } = require("../../helpers/delivery.helper")
 
 exports.listReviews = async (req, res) => {
   try {
-    const isValidDelivery = await isValid(req);
-    if (isValidDelivery) {
-      const filter = req.query;
-      const result = await review.list(filter);
-      res.status(result.code).json(result);
-    }
-    else {
-      res.status(409).json({
-        success: false,
-        error: "You can only see your reviews!",
-        code: 409
-      });
-    }
+    const filter = { delivery: req.tokenData._id, type: "delivery", ...req.query }
+    const result = await review.list(filter);
+    res.status(result.code).json(result);
   } catch (err) {
     console.log(`err.message`, err.message);
     res.status(500).json({
@@ -29,19 +18,9 @@ exports.listReviews = async (req, res) => {
 
 exports.getReview = async (req, res) => {
   try {
-    const isValidDelivery = await isValid(req);
-    if (isValidDelivery) {
-      const filter = req.query;
-      const result = await review.get(filter);
-      res.status(result.code).json(result);
-    }
-    else {
-      res.status(409).json({
-        success: false,
-        error: "You can only see your reviews!",
-        code: 409
-      });
-    }
+    const filter = { delivery: req.tokenData._id, type: "delivery", ...req.query }
+    const result = await review.get(filter);
+    res.status(result.code).json(result);
   } catch (err) {
     console.log(`err.message`, err.message);
     res.status(500).json({

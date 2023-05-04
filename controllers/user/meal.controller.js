@@ -1,10 +1,10 @@
-const mael = require("../../modules/Meal/mael.repo");
+const meal = require("../../modules/Meal/meal.repo");
 
 
-exports.listMaels = async (req, res) => {
+exports.listMeals = async (req, res) => {
   try {
     const filter = req.query
-    const result = await mael.list(filter);
+    const result = await meal.list(filter);
     res.status(result.code).json(result);
   } catch (err) {
     console.log(`err.message`, err.message);
@@ -16,10 +16,10 @@ exports.listMaels = async (req, res) => {
   }
 }
 
-exports.getMael = async (req, res) => {
+exports.getMeal = async (req, res) => {
   try {
     let filter = req.query
-    const result = await mael.get(filter);
+    const result = await meal.get(filter);
     res.status(result.code).json(result);
   } catch (err) {
     console.log(`err.message`, err.message);

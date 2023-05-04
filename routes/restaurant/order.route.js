@@ -6,4 +6,7 @@ app.get("/list", orderController.listOrders);
 app.get("/get", orderController.getOrder);
 
 
+app.put("/applyOrder", orderController.applyOrder);
+
+
 module.exports = app

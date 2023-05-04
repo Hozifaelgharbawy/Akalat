@@ -4,7 +4,7 @@ const { createDeliveryValidation, loginValidation} = require("../../validation/D
 const validator = require("../../helpers/validation.helper")
 
 
-app.post("/create", validator(createDeliveryValidation), deliveryController.register);
+app.post("/register", validator(createDeliveryValidation), deliveryController.register);
 app.post("/login", validator(loginValidation), deliveryController.login);
 
 

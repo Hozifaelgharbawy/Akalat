@@ -4,7 +4,7 @@ const { createRestaurantValidation, loginValidation} = require("../../validation
 const validator = require("../../helpers/validation.helper")
 
 
-app.post("/create", validator(createRestaurantValidation), restaurantController.register);
+app.post("/register", validator(createRestaurantValidation), restaurantController.register);
 app.post("/login", validator(loginValidation), restaurantController.login);
 
 

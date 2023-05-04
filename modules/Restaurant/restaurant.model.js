@@ -1,4 +1,6 @@
 let mongoose = require("mongoose");
+let bcrypt = require("bcrypt");
+let saltrouds = 5;
 
 let restaurantSchema = mongoose.Schema({
     name: { type: String, required: true },

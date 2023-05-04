@@ -1,5 +1,5 @@
 const order = require("../../modules/Order/order.repo");
-
+const deliveryRepo = require("../../modules/Delivery/delivery.repo");
 
 
 exports.listOrders = async (req, res) => {
@@ -32,22 +32,33 @@ exports.getOrder = async (req, res) => {
     }
 }
 
+exports.applyOrder = async (req, res) => {
+    try {
+        let orderId = req.body.order ? req.body.order : req.query.order
+        let result = await order.isExist({ _id: orderId, status: "pending" });
+        let record = await deliveryRepo.isExist({ _id: req.tokenData._id })
+        if ((record.record.restaurant).toString() != (result.record.restaurant).toString()) return res.status(400).json({ success: false, code: 400, error: "This order is not for a restaurant" });
+        if (result.record.delivery) return res.status(400).json({ success: false, code: 400, error: "This order has delivery" });
+        if (result.success) result = await order.update(result.record._id, { delivery: req.tokenData._id });
+        res.status(result.code).json(result);
+    } catch (err) {
+        console.log(`err.message`, err.message);
+        res.status(500).json({
+            success: false,
+            code: 500,
+            error: "Unexpected Error!"
+        });
+    }
+}
 
 exports.checkoutOrder = async (req, res) => {
     try {
         let userId = req.body.user ? req.body.user : req.query.user
-        const userCart = await cartRepo.isExist({ user: userId });
-        if (userCart.record.items.length == 0) return res.status(400).json({ success: false, error: "cart is currently empty", code: 400 });
-        const form = {
-            restaurant: userCart.record.restaurant,
-            delivery: userCart.record.delivery,
-            items: userCart.record.items,
-            total: userCart.record.total,
-            originalTotal: userCart.record.originalTotal,
-            checkoutDate: Date.now()
-        };
-        const result = await orderRepo.create(form);
-        await cartRepo.flush({ user: userId });
+        let restaurantId = req.body.restaurant ? req.body.restaurant : req.query.restaurant
+        let deliveryId = req.body.delivery ? req.body.delivery : req.query.delivery
+        let result = await order.isExist({ user: userId, delivery: deliveryId, restaurant: restaurantId, status: "pending" });
+        let today = new Date();
+        if (result.success) result = await order.update(result.record._id, { status: "accepted", EndDate: today });
         res.status(result.code).json(result);
     } catch (err) {
         console.log(`err.message`, err.message);

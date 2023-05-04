@@ -1,5 +1,5 @@
 let Cart = require("./cart.model")
-const mael = require("../Meal/mael.repo")
+const meal = require("../Meal/meal.repo")
 
 
 exports.isExist = async (filter) => {
@@ -13,7 +13,7 @@ exports.isExist = async (filter) => {
       };
     }
     else {
-      const cart = new Cart({ client: filter.client, total: 0 })
+      const cart = new Cart({ user: filter.user, total: 0, originalTotal: 0 })
       await cart.save();
       return {
         success: true,
@@ -38,7 +38,6 @@ exports.list = async (filter) => {
     let records = await Cart.find(filter)
       .populate({ path: "user", select: "name image" })
       .populate({ path: "restaurant", select: "name image" })
-      .populate({ path: "delivery", select: "name image" });
     return {
       success: true,
       records,
@@ -56,28 +55,35 @@ exports.list = async (filter) => {
 
 exports.get = async (filter) => {
   try {
-    const cart = await Cart.findOne(filter)
-      .populate({ path: "user", select: "name image" })
-      .populate({ path: "restaurant", select: "name image" })
-      .populate({ path: "delivery", select: "name image" });
-    if (cart) {
+    if (filter.user) {
+      let cart = await Cart.findOne(filter)
+        .populate({ path: "user", select: "name image" })
+        .populate({ path: "restaurant", select: "name image" })
+      if (cart) {
+        return {
+          success: true,
+          record: cart,
+          code: 200
+        };
+      }
+      else {
+        cart = new Cart({ user: filter.user, total: 0, originalTotal: 0 })
+        await cart.save();
+        return {
+          success: true,
+          record: cart,
+          code: 201
+        };
+      }
+    } else {
       return {
-        success: true,
-        record: cart,
-        code: 200
-      };
-    }
-    else {
-      const cart = new Cart({ client: filter.client, total: 0 })
-      await cart.save();
-      return {
-        success: true,
-        record: cart,
-        code: 201
+        success: false,
+        code: 404,
+        error: "User ID is required!"
       };
     }
   } catch (err) {
-    const cart = await Cart.findOne(filter)
+    let cart = await Cart.findOne(filter)
     if (cart) {
       return {
         success: false,
@@ -103,9 +109,8 @@ exports.calculateTotal = async (cart) => {
       await Cart.findOneAndUpdate({ _id: cart._id },
         {
           items: [], total: 0, originalTotal: 0,
-          $unset: { restaurant: 1 }, $delivery: { delivery: 1 }
+          $unset: { restaurant: 1 }
         });
-      delete cart.delivery;
       delete cart.restaurant;
     }
     else {
@@ -127,13 +132,13 @@ exports.calculateTotal = async (cart) => {
   }
 }
 
-exports.addItem = async (userId, maelId, quantity) => {
+exports.addItem = async (userId, mealId, quantity) => {
   try {
-    const item = await mael.isExist({ _id: maelId })
+    const item = await meal.isExist({ _id: mealId })
     if (item.success) {
       let price = parseFloat(item.record.price)
       const cart = await this.isExist({ user: userId })
-      const itemExists = await this.isItemInCart(cart.record.items, maelId);
+      const itemExists = await this.isItemInCart(cart.record.items, mealId);
       if (itemExists.success) {
         let newQuantity = parseInt(itemExists.record.quantity) + parseInt(quantity)
         let itemTotal = price * newQuantity
@@ -148,7 +153,8 @@ exports.addItem = async (userId, maelId, quantity) => {
         };
       }
       else {
-        cart.record.items.push({ _id: maelId, meal: item.record, quantity, total: (price * quantity) })
+        cart.record.restaurant = item.record.restaurant
+        cart.record.items.push({ _id: mealId, meal: item.record, quantity, total: (price * quantity) })
         let cartUpdate = await this.calculateTotal(cart.record)
         return {
           success: true,
@@ -174,19 +180,20 @@ exports.addItem = async (userId, maelId, quantity) => {
   }
 }
 
-exports.removeItem = async (userId, maelId, quantity) => {
+exports.removeItem = async (userId, mealId, quantity) => {
   try {
     const cart = await this.isExist({ user: userId })
-    const itemExists = await this.isItemInCart(cart.record.items, maelId);
+    const itemExists = await this.isItemInCart(cart.record.items, mealId);
     if (itemExists.success) {
       let newQuantity = parseInt(itemExists.record.quantity) - parseInt(quantity)
-      let itemTotal = parseFloat(itemExists.record.product.price) * newQuantity
+      let itemTotal = parseFloat(itemExists.record.meal.price) * newQuantity
       let foundItem = cart.record.items[itemExists.index]
       foundItem.quantity = newQuantity
       foundItem.total = itemTotal
       if (newQuantity <= 0) {
         await cart.record.items.splice(itemExists.index, 1);
         cartUpdate = await this.calculateTotal(cart.record)
+        console.log(cartUpdate);
         return {
           success: true,
           record: cartUpdate.record,
@@ -210,6 +217,7 @@ exports.removeItem = async (userId, maelId, quantity) => {
 
     }
   } catch (err) {
+    console.log(err.message);
     return {
       success: false,
       code: 500,
@@ -223,7 +231,7 @@ exports.flush = async (filter) => {
     await Cart.findOneAndUpdate(filter,
       {
         items: [], total: 0, originalTotal: 0,
-        $unset: { restaurant: 1, delivery: 1 }
+        $unset: { restaurant: 1 }
       });
 
     return {
@@ -241,12 +249,12 @@ exports.flush = async (filter) => {
   }
 }
 
-exports.isItemInCart = async (arrayOfItems, maelId) => {
+exports.isItemInCart = async (arrayOfItems, mealId) => {
   try {
     let i = -1
     const result = await arrayOfItems.find(element => {
       i++;
-      if (element.mael._id == maelId) { return element }
+      if (element._id == mealId) { return element }
     });
     if (result) {
       return {

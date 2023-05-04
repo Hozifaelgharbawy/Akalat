@@ -5,10 +5,11 @@ let fs = require("fs")
 
 
 
-exports.register = async (req, res) => {
+exports.createAdmin = async (req, res) => {
   try {
+    if (req.token.role != "superAdmin") return res.status(409).json({ success: false, error: "Only superAdmin can create an admins!", code: 409 });
     let form
-    if (req.body.role != "admin") {
+    if (req.body.role != "admin" || req.body.role != "superAdmin") {
       form = {
         role: "admin",
         ...req.body

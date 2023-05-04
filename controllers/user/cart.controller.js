@@ -31,7 +31,7 @@ exports.addItemToCart = async (req, res) => {
     try {
         const isValid = await isValidOrder(req);
         if (isValid) {
-            const result = await cartRepo.addItem(req.query.user, req.query.mael, req.query.quantity)
+            const result = await cartRepo.addItem(req.query.user, req.query.meal, req.query.quantity)
             res.status(result.code).json(result)
         }
         else res.status(409).json({
@@ -54,7 +54,7 @@ exports.removeItemFromCart = async (req, res) => {
     try {
         const isValid = await isValidOrder(req);
         if (isValid) {
-            const result = await cartRepo.removeItem(req.query.user, req.query.mael, req.query.quantity)
+            const result = await cartRepo.removeItem(req.query.user, req.query.meal, req.query.quantity)
             res.status(result.code).json(result)
         }
         else res.status(409).json({

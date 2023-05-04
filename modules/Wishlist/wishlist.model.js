@@ -7,6 +7,7 @@ let wishlistSchema = mongoose.Schema({
         ref: "users", required: true
     },
     items: [{
+        _id: { type: mongoose.Types.ObjectId, ref: "meals" },
         meal: {
             type: Object,
             ref: "meals"

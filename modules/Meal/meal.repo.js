@@ -1,4 +1,4 @@
-let Meal = require("./mael.model")
+let Meal = require("./meal.model")
 let fs = require("fs")
 const Cart = require("../Cart/cart.model");
 const Review = require("../Review/review.repo");
@@ -154,7 +154,7 @@ exports.remove = async (_id) => {
           console.log(`err`, err.errno);
         }
       }
-      await Delivery.findByIdAndDelete({ _id })
+      await Meal.findByIdAndDelete({ _id })
       await Cart.deleteMany({ "items._id": _id })
       await Wishlist.deleteMany({ "items._id": _id })
       let reviews = await Review.list({ "meal": _id })

@@ -6,7 +6,7 @@ const validator = require("../../helpers/validation.helper")
 const { uploadImage } = require("../../helpers/uploader.helper")
 const upload = uploadImage("admins")
 
-app.post("/create", validator(createUserValidation), adminController.register);
+app.post("/create", validator(createUserValidation), adminController.createAdmin);
 
 app.get("/get", adminController.getAdmin);
 app.get("/list", adminController.listAdmins);

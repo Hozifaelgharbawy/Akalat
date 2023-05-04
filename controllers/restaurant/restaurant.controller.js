@@ -69,7 +69,7 @@ exports.resetPassword = async (req, res) => {
 
 exports.getRestaurant = async (req, res) => {
   try {
-    let filter = (req.query.restaurant) != undefined ? req.query : { restaurant: req.tokenData._id, ...req.query }
+    let filter = (req.query._id) != undefined ? req.query : { _id: req.tokenData._id, ...req.query }
     const result = await restaurant.get(filter);
     res.status(result.code).json(result);
   } catch (err) {

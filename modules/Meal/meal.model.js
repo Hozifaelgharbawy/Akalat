@@ -1,6 +1,6 @@
 let mongoose = require("mongoose");
 
-let maelSchema = mongoose.Schema({
+let mealSchema = mongoose.Schema({
     restaurant: {
         type: mongoose.Types.ObjectId,
         ref: "restaurants"
@@ -16,7 +16,7 @@ let maelSchema = mongoose.Schema({
 })
 
 
-let maelModel = mongoose.model("maels", maelSchema)
+let mealModel = mongoose.model("meals", mealSchema)
 
 
-module.exports = maelModel;
+module.exports = mealModel;

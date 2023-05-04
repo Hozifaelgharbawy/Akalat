@@ -7,13 +7,13 @@ const { updateMealVaidation } = require("../../validation/Meal/meal.updateVaidat
 const validator = require("../../helpers/validation.helper")
 
 
-app.post("/create", validator(createMealVaidation), mealController.createMael);
+app.post("/create", validator(createMealVaidation), mealController.createMeal);
 
-app.get("/get", mealController.getMael);
-app.get("/list", mealController.listMaels);
+app.get("/get", mealController.getMeal);
+app.get("/list", mealController.listMeals);
 
-app.put("/update", validator(updateMealVaidation), mealController.updateMael);
-app.delete("/remove", mealController.removeMael);
+app.put("/update", validator(updateMealVaidation), mealController.updateMeal);
+app.delete("/remove", mealController.removeMeal);
 app.post("/image", upload.array('image', 8), mealController.uploadImage)
 app.post("/addImage", upload.array('image', 8), mealController.addToImagesArray)
 app.delete("/image", mealController.deleteImage)

@@ -51,7 +51,7 @@ exports.get = async (filter) => {
         return {
           success: false,
           code: 404,
-          error: "Delivery is not found!"
+          error: "User is not found!"
         };
       }
     }

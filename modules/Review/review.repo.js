@@ -1,5 +1,5 @@
 let Review = require("./review.model")
-const mealRepo = require("../Meal/mael.repo");
+const mealRepo = require("../Meal/meal.repo");
 const restaurantRepo = require("../Restaurant/restaurant.repo");
 const deliveryRepo = require("../Delivery/delivery.repo");
 
@@ -39,7 +39,7 @@ exports.list = async (filter) => {
       .populate({ path: "user", select: "name image" })
       .populate({ path: "restaurant", select: "name image" })
       .populate({ path: "delivery", select: "name image" })
-      .populate({ path: "mael", select: "name image" });
+      .populate({ path: "meal", select: "name image" });
     return {
       success: true,
       records,
@@ -63,7 +63,7 @@ exports.get = async (filter) => {
         .populate({ path: "user", select: "name image" })
         .populate({ path: "restaurant", select: "name image" })
         .populate({ path: "delivery", select: "name image" })
-        .populate({ path: "mael", select: "name image" });
+        .populate({ path: "meal", select: "name image" });
       if (record) {
         return {
           success: true,
@@ -100,8 +100,8 @@ exports.get = async (filter) => {
 exports.create = async (form) => {
   try {
     let review;
-    if (form.type == "mael") {
-      review = await this.isExist({ user: form.user, restaurant: form.restaurant, mael: form.mael, type: form.type });
+    if (form.type == "meal") {
+      review = await this.isExist({ user: form.user, restaurant: form.restaurant, meal: form.meal, type: form.type });
     }
     else if (form.type == "restaurant") {
       review = await this.isExist({ user: form.user, restaurant: form.restaurant, type: form.type })
@@ -172,21 +172,21 @@ exports.remove = async (_id) => {
     let review = await this.isExist({ _id })
     if (review.success) {
       let clientOldRating = review.record.rating
-      if (review.record.type === "mael") {
-        const mael = await mealRepo.isExist({ _id: review.record.mael });
-        let maelOldRating = mael.record.rating
-        const newRateSum = maelOldRating * (mael.record.numOfReviews - 1) - clientOldRating;
-        const newRate = newRateSum / (mael.record.numOfReviews - 1);
-        await mealRepo.update(review.record.mael, { rate: newRate, numOfReviews: mael.record.numOfReviews - 1 });
+      if (review.record.type === "meal") {
+        const meal = await mealRepo.isExist({ _id: review.record.meal });
+        let mealOldRating = meal.record.rate
+        const newRateSum = mealOldRating * (meal.record.numOfReviews - 1) - clientOldRating;
+        const newRate = newRateSum / (meal.record.numOfReviews - 1);
+        await mealRepo.update(review.record.meal, { rate: newRate, numOfReviews: meal.record.numOfReviews - 1 });
       } else if (review.record.type === "restaurant") {
         const restaurant = await restaurantRepo.isExist({ _id:review.record.restaurant });
-        let restaurantOldRating = restaurant.record.rating
+        let restaurantOldRating = restaurant.record.rate
         const newRateSum = restaurantOldRating * (restaurant.record.numOfReviews - 1) - clientOldRating;
         const newRate = newRateSum / (restaurant.record.numOfReviews - 1);
         await restaurantRepo.update(review.record.restaurant, { rate: newRate, numOfReviews: restaurant.record.numOfReviews - 1 });
       } else if (review.record.type === "delivery") {
         const delivery = await deliveryRepo.isExist({ _id: review.record.delivery });
-        let deliveryOldRating = delivery.record.rating
+        let deliveryOldRating = delivery.record.rate
         const newRateSum = deliveryOldRating * (delivery.record.numOfReviews - 1) - clientOldRating;
         const newRate = newRateSum / (delivery.record.numOfReviews - 1);
         await deliveryRepo.update(review.record.delivery, { rate: newRate, numOfReviews: delivery.record.numOfReviews - 1 });

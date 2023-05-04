@@ -1,21 +1,21 @@
-const mael = require("../../modules/Meal/mael.repo");
+const meal = require("../../modules/Meal/meal.repo");
 let fs = require("fs")
 const { isValid } = require("../../helpers/restaurant.helper")
 
 
 
-exports.createMael = async (req, res) => {
+exports.createMeal = async (req, res) => {
   try {
     const isValidRestaurant = await isValid(req);
     if (isValidRestaurant) {
       let form = (req.body.restaurant) != undefined && (req.body.restaurant) != "" ? req.body : { restaurant: req.tokenData._id, ...req.body }
-      let result = await mael.create(form)
+      let result = await meal.create(form)
       return res.status(result.code).json(result)
     }
     else {
       res.status(409).json({
         success: false,
-        error: "You can only control your maels!",
+        error: "You can only control your meals!",
         code: 409
       });
     }
@@ -29,21 +29,26 @@ exports.createMael = async (req, res) => {
   }
 }
 
-exports.listMaels = async (req, res) => {
+exports.listMeals = async (req, res) => {
   try {
-    const isValidRestaurant = await isValid(req);
-    if (isValidRestaurant) {
+    const filter = { restaurant: req.tokenData._id, ...req.query }
+    const result = await meal.list(filter);
+    res.status(result.code).json(result);
+  } catch (err) {
+    console.log(`err.message`, err.message);
+    res.status(500).json({
+      success: false,
+      code: 500,
+      error: "Unexpected Error!"
+    });
+  }
+}
+
+exports.getMeal = async (req, res) => {
+  try {
       const filter = { restaurant: req.tokenData._id, ...req.query }
-      const result = await mael.list(filter);
+      const result = await meal.get(filter);
       res.status(result.code).json(result);
-    }
-    else {
-      res.status(409).json({
-        success: false,
-        error: "You can only control your maels!",
-        code: 409
-      });
-    }
   } catch (err) {
     console.log(`err.message`, err.message);
     res.status(500).json({
@@ -54,42 +59,17 @@ exports.listMaels = async (req, res) => {
   }
 }
 
-exports.getMael = async (req, res) => {
+exports.updateMeal = async (req, res) => {
   try {
-    const isValidRestaurant = await isValid(req);
-    if (isValidRestaurant) {
-      const filter = { restaurant: req.tokenData._id, ...req.query }
-      const result = await mael.get(filter);
-      res.status(result.code).json(result);
-    }
-    else {
-      res.status(409).json({
-        success: false,
-        error: "You can only control your maels!",
-        code: 409
-      });
-    }
-  } catch (err) {
-    console.log(`err.message`, err.message);
-    res.status(500).json({
-      success: false,
-      code: 500,
-      error: "Unexpected Error!"
-    });
-  }
-}
-
-exports.updateMael = async (req, res) => {
-  try {
-    const Meal = await mael.isExist({ _id: req.query._id, restaurant: req.tokenData._id });
+    const Meal = await meal.isExist({ _id: req.query._id, restaurant: req.tokenData._id });
     if (Meal.success) {
-      const result = await mael.update(req.query._id, req.body);
+      const result = await meal.update(req.query._id, req.body);
       res.status(result.code).json(result);
     }
     else {
       res.status(409).json({
         success: false,
-        error: "You can only control your maels!",
+        error: "You can only control your meals!",
         code: 409
       });
     }
@@ -103,17 +83,17 @@ exports.updateMael = async (req, res) => {
   }
 }
 
-exports.removeMael = async (req, res) => {
+exports.removeMeal = async (req, res) => {
   try {
-    const Meal = await mael.isExist({ _id: req.query._id, restaurant: req.tokenData._id });
+    const Meal = await meal.isExist({ _id: req.query._id, restaurant: req.tokenData._id });
     if (Meal.success) {
-      const result = await mael.remove(req.query._id);
+      const result = await meal.remove(req.query._id);
       res.status(result.code).json(result);
     }
     else {
       res.status(409).json({
         success: false,
-        error: "You can only control your maels!",
+        error: "You can only control your meals!",
         code: 409
       });
     }
@@ -130,7 +110,7 @@ exports.removeMael = async (req, res) => {
 exports.uploadImage = async (req, res) => {
   try {
     let image = req.files;
-    const result = await mael.isExist({ _id: req.query._id, restaurant: req.tokenData._id })
+    const result = await meal.isExist({ _id: req.query._id, restaurant: req.tokenData._id })
     if (result.success) {
       let oldImage = (result.success && result.record.image) ? (result.record.image) : false
       if (oldImage) {
@@ -143,7 +123,7 @@ exports.uploadImage = async (req, res) => {
           console.log(`err`, err.errno);
         }
       }
-      const update = await mael.update(req.query._id, { image: image });
+      const update = await meal.update(req.query._id, { image: image });
       if (update.success) {
         res.status(update.code).json({ success: update.success, record: update.record.image, code: update.code });
       }
@@ -154,7 +134,7 @@ exports.uploadImage = async (req, res) => {
     else {
       res.status(409).json({
         success: false,
-        error: "You can only control your maels!",
+        error: "You can only control your meals!",
         code: 409
       });
     }
@@ -170,7 +150,7 @@ exports.uploadImage = async (req, res) => {
 
 exports.addToImagesArray = async (req, res) => {
   try {
-    const result = await mael.isExist({ _id: req.query._id, restaurant: req.tokenData._id })
+    const result = await meal.isExist({ _id: req.query._id, restaurant: req.tokenData._id })
     if (result.success) {
       let oldImage = (result.success && result.record.image) ? (result.record.image) : false
       let count = oldImage.length + req.files.length
@@ -184,10 +164,10 @@ exports.addToImagesArray = async (req, res) => {
         res.status(400).json({
           success: false,
           code: 400,
-          error: "The number of mael images must be a maximum of 8 images"
+          error: "The number of meal images must be a maximum of 8 images"
         });
       }
-      const update = await mael.update(req.query._id, { image: oldImage });
+      const update = await meal.update(req.query._id, { image: oldImage });
       if (update.success) {
         res.status(update.code).json({ success: update.success, record: update.record.image, code: update.code });
       }
@@ -198,7 +178,7 @@ exports.addToImagesArray = async (req, res) => {
     else {
       res.status(409).json({
         success: false,
-        error: "You can only control your maels!",
+        error: "You can only control your meals!",
         code: 409
       });
     }
@@ -214,7 +194,7 @@ exports.addToImagesArray = async (req, res) => {
 
 exports.deleteImage = async (req, res) => {
   try {
-    const result = await mael.isExist({ _id: req.query._id, restaurant: req.tokenData._id })
+    const result = await meal.isExist({ _id: req.query._id, restaurant: req.tokenData._id })
     if (result.success) {
       let oldImage = (result.success && result.record.image) ? (result.record.image) : false
       if (oldImage) {
@@ -227,7 +207,7 @@ exports.deleteImage = async (req, res) => {
           console.log(`err`, err.errno);
         }
       }
-      const update = await mael.update(req.query._id, { image: [] });
+      const update = await meal.update(req.query._id, { image: [] });
       if (update.success) {
         res.status(update.code).json({ success: update.success, code: update.code });
       }
@@ -238,7 +218,7 @@ exports.deleteImage = async (req, res) => {
     else {
       res.status(409).json({
         success: false,
-        error: "You can only control your maels!",
+        error: "You can only control your meals!",
         code: 409
       });
     }
@@ -254,17 +234,18 @@ exports.deleteImage = async (req, res) => {
 
 exports.removeFromImagesArray = async (req, res) => {
   try {
-    const result = await mael.isExist({ _id: req.query._id, restaurant: req.tokenData._id });
+    const result = await meal.isExist({ _id: req.query._id, restaurant: req.tokenData._id });
     if (result.success) {
       await req.body.paths.map((path) => {
-        mael.update(req.query._id, { $pull: { image: { path: path } } });
+        meal.update(req.query._id, { $pull: { image: { path: path } } });
+        fs.unlinkSync(path);
       });
       res.status(200).json({ success: true, code: 200 });
     }
     else {
       res.status(409).json({
         success: false,
-        error: "You can only control your maels!",
+        error: "You can only control your meals!",
         code: 409
       });
     }

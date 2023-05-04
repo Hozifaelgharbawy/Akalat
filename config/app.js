@@ -3,7 +3,7 @@ const app = express();
 require("dotenv").config();
 const bodyParser = require("body-parser");
 const routes = require("../routes/index.route");
-
+const { handleFileUploadErrors } = require("../helpers/uploader.helper")
 const databaseConnection = require("./database").connection;
 
 const morgan = require("morgan");
@@ -19,5 +19,6 @@ app.use(morgan("dev"));
 app.use(bodyParser.json());
 
 app.use(routes);
+app.use(handleFileUploadErrors)
 
 module.exports = app;

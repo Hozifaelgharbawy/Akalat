@@ -19,9 +19,9 @@ module.exports = {
                 "any.required": "restaurant Id must be entered",
                 "string.empty": "restaurant Id cannot be empty"
             }),
-            mael: joi.string().empty().optional().messages({
-                "string.base": "please enter a valid mael Id",
-                "string.empty": "mael Id cannot be empty"
+            meal: joi.string().empty().optional().messages({
+                "string.base": "please enter a valid meal Id",
+                "string.empty": "meal Id cannot be empty"
             }),
             delivery: joi.string().empty().optional().messages({
                 "string.base": "please enter a valid delivery Id",
@@ -42,9 +42,9 @@ module.exports = {
             }),
 
             type: joi.string().empty().required().messages({
-                "string.base": "please enter a valid type [delivery, restaurant, mael]",
+                "string.base": "please enter a valid type [delivery, restaurant, meal]",
                 "string.empty": "type cannot be empty",
-                "any.required": "type must be entered [delivery, restaurant, mael]"
+                "any.required": "type must be entered [delivery, restaurant, meal]"
             })
 
 

@@ -2,7 +2,7 @@ let joi = require("joi")
 
 
 module.exports = {
-  createDeliveryValidation: {
+  createUserValidation: {
     body: joi.object().required().keys({
       name: joi.string().required().empty().messages({
         "string.base": "please enter a valid name",

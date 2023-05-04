@@ -3,7 +3,7 @@ let mongoose = require("mongoose");
 let orderSchema = mongoose.Schema({
     user: {
         type: mongoose.Types.ObjectId,
-        ref: "users", required: true
+        ref: "users"
     },
     restaurant: {
         type: mongoose.Types.ObjectId,
@@ -17,8 +17,7 @@ let orderSchema = mongoose.Schema({
         {
             _id: { type: mongoose.Types.ObjectId, ref: "meals" },
             meal: {
-                type: Object,
-                ref: "meals"
+                type: Object
             },
             quantity: Number,
             total: Number
@@ -26,7 +25,10 @@ let orderSchema = mongoose.Schema({
     ],
     total: { type: Number, required: true },
     originalTotal: { type: Number, required: true },
-    checkoutDate: { type: Date, default: Date.now() }
+    startDate: { type: Date },
+    defaultEndDate: { type: Date },
+    EndDate: { type: Date },
+    status: { type: String, enum: ["accepted", "pending"], default: "pending" }
 })
 
 
