@@ -37,6 +37,9 @@ exports.isExist = async (filter) => {
 exports.get = async (filter) => {
   try {
     if (filter) {
+      if ((Object.keys(filter)).includes("name")) {
+        return await this.search(filter["name"], filter);
+      }
       let record = await Delivery.findOne(filter).select("-password")
         .populate({ path: "restaurant", select: "name image" });
       if (record) {
@@ -73,6 +76,9 @@ exports.get = async (filter) => {
 
 exports.list = async (filter) => {
   try {
+    if ((Object.keys(filter)).includes("name")) {
+      return await this.search(filter["name"], filter);
+    }
     let delivery = await Delivery.find(filter).select("-password")
     .populate({ path: "restaurant", select: "name image"});
     return {
@@ -88,6 +94,25 @@ exports.list = async (filter) => {
       error: "Unexpected Error!"
     };
   }
+}
+
+exports.search = async (keyword, filter) => {
+  try {
+    delete filter['name']
+    let records = await Delivery.find({ ["name"]: { $regex: keyword, $options: 'i' }, ...filter });
+    return {
+      success: true,
+      records,
+      code: 200
+    };
+  } catch (err) {
+    return {
+      success: false,
+      code: 500,
+      error: "Unexpected Error!"
+    };
+  }
+
 }
 
 exports.create = async (form) => {

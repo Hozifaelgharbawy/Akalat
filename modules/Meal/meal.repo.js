@@ -36,6 +36,9 @@ exports.isExist = async (filter) => {
 exports.get = async (filter) => {
   try {
     if (filter) {
+      if ((Object.keys(filter)).includes("name")) {
+        return await this.search(filter["name"], filter);
+      }
       let record = await Meal.findOne(filter)
         .populate({ path: "restaurant", select: "name image" });
       if (record) {
@@ -72,6 +75,9 @@ exports.get = async (filter) => {
 
 exports.list = async (filter) => {
   try {
+    if ((Object.keys(filter)).includes("name")) {
+      return await this.search(filter["name"], filter);
+    }
     let meal = await Meal.find(filter)
       .populate({ path: "restaurant", select: "name image" });
     return {
@@ -87,6 +93,25 @@ exports.list = async (filter) => {
       error: "Unexpected Error!"
     };
   }
+}
+
+exports.search = async (keyword, filter) => {
+  try {
+    delete filter['name']
+    let records = await Meal.find({ ["name"]: { $regex: keyword, $options: 'i' }, ...filter });
+    return {
+      success: true,
+      records,
+      code: 200
+    };
+  } catch (err) {
+    return {
+      success: false,
+      code: 500,
+      error: "Unexpected Error!"
+    };
+  }
+
 }
 
 exports.create = async (form) => {
@@ -159,7 +184,7 @@ exports.remove = async (_id) => {
       await Wishlist.deleteMany({ "items._id": _id })
       let reviews = await Review.list({ "meal": _id })
       await reviews.records.map((review) => {
-        Review.remove( review._id )
+        Review.remove(review._id)
       })
       await Order.deleteMany({ "items._id": _id })
       return {
