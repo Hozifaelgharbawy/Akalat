@@ -64,3 +64,24 @@ exports.checkoutOrder = async (req, res) => {
     }
 
 }
+
+
+
+exports.accepteOrder = async (req, res) => {
+    try {
+        let userId = req.body.user ? req.body.user : req.query.user
+        let restaurantId = req.body.restaurant ? req.body.restaurant : req.query.restaurant
+        let deliveryId = req.body.delivery ? req.body.delivery : req.query.delivery
+        let result = await order.isExist({ user: userId, delivery: deliveryId, restaurant: restaurantId, status: "pending" });
+        if (result.success) result = await order.update(result.record._id, { acceptedUser: "accepted" });
+        res.status(result.code).json(result);
+    } catch (err) {
+        console.log(`err.message`, err.message);
+        res.status(500).json({
+            success: false,
+            code: 500,
+            error: "Unexpected Error!"
+        });
+    }
+
+}

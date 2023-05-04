@@ -28,7 +28,8 @@ let orderSchema = mongoose.Schema({
     startDate: { type: Date },
     defaultEndDate: { type: Date },
     EndDate: { type: Date },
-    status: { type: String, enum: ["accepted", "pending"], default: "pending" }
+    status: { type: String, enum: ["accepted", "pending"], default: "pending" },
+    acceptedUser: { type: String, enum: ["accepted", "pending"], default: "pending" }
 })
 
 

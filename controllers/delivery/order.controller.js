@@ -37,8 +37,8 @@ exports.applyOrder = async (req, res) => {
         let orderId = req.body.order ? req.body.order : req.query.order
         let result = await order.isExist({ _id: orderId, status: "pending" });
         let record = await deliveryRepo.isExist({ _id: req.tokenData._id })
-        if ((record.record.restaurant).toString() != (result.record.restaurant).toString()) return res.status(400).json({ success: false, code: 400, error: "This order is not for a restaurant" });
-        if (result.record.delivery) return res.status(400).json({ success: false, code: 400, error: "This order has delivery" });
+        if (result.success && (record.record.restaurant).toString() != (result.record.restaurant).toString()) return res.status(400).json({ success: false, code: 400, error: "This order is not for a restaurant" });
+        if (result.success && result.record.delivery) return res.status(400).json({ success: false, code: 400, error: "This order has delivery" });
         if (result.success) result = await order.update(result.record._id, { delivery: req.tokenData._id });
         res.status(result.code).json(result);
     } catch (err) {
@@ -57,6 +57,7 @@ exports.checkoutOrder = async (req, res) => {
         let restaurantId = req.body.restaurant ? req.body.restaurant : req.query.restaurant
         let deliveryId = req.body.delivery ? req.body.delivery : req.query.delivery
         let result = await order.isExist({ user: userId, delivery: deliveryId, restaurant: restaurantId, status: "pending" });
+        if (result.success && result.record.acceptedUser != "accepted") return res.status(409).json({ success: false, error: "user not accepted order!", code: 409 });
         let today = new Date();
         if (result.success) result = await order.update(result.record._id, { status: "accepted", EndDate: today });
         res.status(result.code).json(result);
