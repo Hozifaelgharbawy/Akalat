@@ -61,9 +61,9 @@ exports.get = async (filter) => {
     if (filter) {
       let record = await Review.findOne(filter)
         .populate({ path: "user", select: "name image" })
-        .populate({ path: "restaurant", select: "name image" })
-        .populate({ path: "delivery", select: "name image" })
-        .populate({ path: "meal", select: "name image" });
+        .populate({ path: "restaurant", select: "name image rate" })
+        .populate({ path: "delivery", select: "name image rate" })
+        .populate({ path: "meal", select: "name image rate" });
       if (record) {
         return {
           success: true,
