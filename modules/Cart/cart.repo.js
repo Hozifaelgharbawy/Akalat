@@ -153,6 +153,13 @@ exports.addItem = async (userId, mealId, quantity) => {
         };
       }
       else {
+        if ((cart.record.items).length != 0 && (cart.record.restaurant).toString() != (item.record.restaurant).toString()) {
+          return {
+            success: false,
+            error: "Meals from different restaurants cannot be added",
+            code: 409
+          }
+        }
         cart.record.restaurant = item.record.restaurant
         cart.record.items.push({ _id: mealId, meal: item.record, quantity, total: (price * quantity) })
         let cartUpdate = await this.calculateTotal(cart.record)
