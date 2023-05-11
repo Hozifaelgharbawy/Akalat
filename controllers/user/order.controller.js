@@ -72,7 +72,8 @@ exports.accepteOrder = async (req, res) => {
         let userId = req.body.user ? req.body.user : req.query.user
         let restaurantId = req.body.restaurant ? req.body.restaurant : req.query.restaurant
         let deliveryId = req.body.delivery ? req.body.delivery : req.query.delivery
-        let result = await order.isExist({ user: userId, delivery: deliveryId, restaurant: restaurantId, status: "pending" });
+        let orderId = req.body.order ? req.body.order : req.query.order
+        let result = await order.isExist({_id: orderId, user: userId, delivery: deliveryId, restaurant: restaurantId, status: "pending" });
         if (result.success) result = await order.update(result.record._id, { acceptedUser: "accepted" });
         res.status(result.code).json(result);
     } catch (err) {

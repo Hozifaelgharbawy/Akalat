@@ -9,6 +9,7 @@ const databaseConnection = require("./database").connection;
 const morgan = require("morgan");
 const cors = require("cors");
 
+app.use("/uploads", express.static('uploads'))
 
 
 databaseConnection();

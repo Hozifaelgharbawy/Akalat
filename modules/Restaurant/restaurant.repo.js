@@ -151,7 +151,7 @@ exports.update = async (_id, form) => {
       if (form.email) {
         form.email = form.email.toLowerCase()
         const duplicate = await this.isExist({ email: form.email });
-        if (duplicate.success && duplicate.record._id != restaurant.record._id)
+        if (duplicate.success && (duplicate.record._id).toString() != (restaurant.record._id).toString())
           return {
             success: false,
             error: "This Email is taken by another Restaurant",
