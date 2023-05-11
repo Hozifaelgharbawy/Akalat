@@ -33,7 +33,8 @@ exports.get = async (filter) => {
         if (filter.user) {
             let wishlist = await Wishlist.findOne(filter)
                 .populate({ path: "user", select: "name image" })
-                .populate({ path: "items.restaurant", select: "name image" });
+                .populate({ path: "items.restaurant", select: "name image" })
+                .populate({ path: "items.meal", select: "name image" });
             if (wishlist) {
                 return {
                     success: true,

@@ -160,6 +160,7 @@ exports.addItem = async (userId, mealId, quantity) => {
             code: 409
           }
         }
+
         cart.record.restaurant = item.record.restaurant
         cart.record.items.push({ _id: mealId, meal: item.record, quantity, total: (price * quantity) })
         let cartUpdate = await this.calculateTotal(cart.record)
