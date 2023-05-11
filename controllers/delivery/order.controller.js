@@ -56,7 +56,8 @@ exports.checkoutOrder = async (req, res) => {
         let userId = req.body.user ? req.body.user : req.query.user
         let restaurantId = req.body.restaurant ? req.body.restaurant : req.query.restaurant
         let deliveryId = req.body.delivery ? req.body.delivery : req.query.delivery
-        let result = await order.isExist({ user: userId, delivery: deliveryId, restaurant: restaurantId, status: "pending" });
+        let orderId = req.body.order ? req.body.order : req.query.order
+        let result = await order.isExist({_id: orderId, user: userId, delivery: deliveryId, restaurant: restaurantId, status: "pending" });
         if (result.success && result.record.acceptedUser != "accepted") return res.status(409).json({ success: false, error: "user not accepted order!", code: 409 });
         let today = new Date();
         if (result.success) result = await order.update(result.record._id, { status: "accepted", EndDate: today });
